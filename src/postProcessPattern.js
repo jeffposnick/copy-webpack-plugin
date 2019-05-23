@@ -2,10 +2,11 @@ import path from 'path';
 import os from 'os';
 import crypto from 'crypto';
 
-import loaderUtils from 'loader-utils';
 import cacache from 'cacache';
-import serialize from 'serialize-javascript';
 import findCacheDir from 'find-cache-dir';
+import loaderUtils from 'loader-utils';
+import normalizePath from 'normalize-path';
+import serialize from 'serialize-javascript';
 
 import { name, version } from '../package.json';
 
@@ -176,21 +177,20 @@ export default function postProcessPattern(globalRef, pattern, file) {
 
         written[file.webpackTo][file.absoluteFrom] = hash;
 
-        if (compilation.assets[file.webpackTo] && !file.force) {
-          logger.info(
-            `skipping '${file.webpackTo}', because it already exists`
-          );
+        const assetFilename = normalizePath(file.webpackTo);
+        if (compilation.assets[assetFilename] && !file.force) {
+          logger.info(`skipping '${assetFilename}', because it already exists`);
 
           return;
         }
 
         logger.info(
-          `writing '${file.webpackTo}' to compilation assets from '${
+          `writing '${assetFilename}' to compilation assets from '${
             file.absoluteFrom
           }'`
         );
 
-        compilation.assets[file.webpackTo] = {
+        compilation.assets[assetFilename] = {
           size() {
             return stats.size;
           },
